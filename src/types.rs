@@ -60,12 +60,11 @@ macro_rules! key_no_default {
 macro_rules! key_methods {
     ($i:ident, $s:expr) => {
         impl $i {
+            /// Memory length of the type
+            pub const LEN: usize = $s;
+
             pub const fn new(bytes: [u8; $s]) -> Self {
                 Self(bytes)
-            }
-
-            pub const fn size_of() -> usize {
-                $s
             }
 
             // Similar behavior to Default::default but with `const` directive
@@ -78,7 +77,7 @@ macro_rules! key_methods {
             /// # Warning
             ///
             /// This function will not panic if the length of the slice is smaller than
-            /// `Self::size_of`. Instead, it will cause undefined behavior and read random disowned
+            /// `Self::LEN`. Instead, it will cause undefined behavior and read random disowned
             /// bytes
             pub unsafe fn from_slice_unchecked(bytes: &[u8]) -> Self {
                 $i(bytes::from_slice_unchecked(bytes))
@@ -176,7 +175,7 @@ mod tests {
     macro_rules! check_consistency {
         ($i:ident,$r:expr,$b:expr) => {
             unsafe {
-                let n = $i::size_of();
+                let n = $i::LEN;
                 let s = $r.gen_range(0..$b.len() - n);
                 let e = $r.gen_range(s + n..$b.len());
                 let r = $r.gen_range(1..n - 1);
