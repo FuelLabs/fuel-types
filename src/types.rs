@@ -3,12 +3,22 @@ use crate::bytes;
 use core::array::TryFromSliceError;
 use core::convert::TryFrom;
 use core::ops::{Deref, DerefMut};
+use core::{fmt, str};
 
 #[cfg(feature = "random")]
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
+
+const fn hex_val(c: u8) -> Option<u8> {
+    match c {
+        b'A'..=b'F' => Some(c - b'A' + 10),
+        b'a'..=b'f' => Some(c - b'a' + 10),
+        b'0'..=b'9' => Some(c - b'0'),
+        _ => None,
+    }
+}
 
 macro_rules! key {
     ($i:ident, $s:expr) => {
@@ -148,6 +158,53 @@ macro_rules! key_methods {
                 <[u8; $s]>::try_from(bytes).map(|b| b.into())
             }
         }
+
+        impl fmt::LowerHex for $i {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                if f.alternate() {
+                    write!(f, "0x")?
+                }
+
+                self.0.iter().try_for_each(|b| write!(f, "{:02x}", &b))
+            }
+        }
+
+        impl fmt::UpperHex for $i {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                if f.alternate() {
+                    write!(f, "0x")?
+                }
+
+                self.0.iter().try_for_each(|b| write!(f, "{:02X}", &b))
+            }
+        }
+
+        impl str::FromStr for $i {
+            type Err = &'static str;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                const ERR: &str = "Invalid encoded byte";
+
+                let alternate = s.starts_with("0x");
+
+                let mut b = s.bytes();
+                let mut ret = $i::zeroed();
+
+                if alternate {
+                    b.next();
+                    b.next();
+                }
+
+                for r in ret.as_mut() {
+                    let h = b.next().and_then(hex_val).ok_or(ERR)?;
+                    let l = b.next().and_then(hex_val).ok_or(ERR)?;
+
+                    *r = h << 4 | l;
+                }
+
+                Ok(ret)
+            }
+        }
     };
 }
 
@@ -166,11 +223,12 @@ impl ContractId {
 }
 
 #[cfg(all(test, feature = "random"))]
-mod tests {
+mod tests_random {
     use crate::*;
     use rand::rngs::StdRng;
     use rand::{Rng, RngCore, SeedableRng};
     use std::convert::TryFrom;
+    use std::{fmt, str};
 
     macro_rules! check_consistency {
         ($i:ident,$r:expr,$b:expr) => {
@@ -225,5 +283,49 @@ mod tests {
             check_consistency!(Bytes64, rng, bytes);
             check_consistency!(Salt, rng, bytes);
         }
+    }
+
+    #[test]
+    fn hex_encoding() {
+        fn encode_decode<T>(t: T)
+        where
+            T: fmt::LowerHex + fmt::UpperHex + str::FromStr + Eq + fmt::Debug,
+            <T as str::FromStr>::Err: fmt::Debug,
+        {
+            let lower = format!("{:x}", t);
+            let lower_alternate = format!("{:#x}", t);
+            let upper = format!("{:X}", t);
+            let upper_alternate = format!("{:#X}", t);
+
+            assert_ne!(lower, lower_alternate);
+            assert_ne!(lower, upper);
+            assert_ne!(lower, upper_alternate);
+            assert_ne!(lower_alternate, upper);
+            assert_ne!(lower_alternate, upper_alternate);
+            assert_ne!(upper, upper_alternate);
+
+            let lower = T::from_str(lower.as_str()).expect("Failed to parse lower");
+            let lower_alternate =
+                T::from_str(lower_alternate.as_str()).expect("Failed to parse lower alternate");
+            let upper = T::from_str(upper.as_str()).expect("Failed to parse upper");
+            let upper_alternate =
+                T::from_str(upper_alternate.as_str()).expect("Failed to parse upper alternate");
+
+            assert_eq!(t, lower);
+            assert_eq!(t, lower_alternate);
+            assert_eq!(t, upper);
+            assert_eq!(t, upper_alternate);
+        }
+
+        let rng = &mut StdRng::seed_from_u64(8586);
+
+        encode_decode(rng.gen::<Address>());
+        encode_decode(rng.gen::<Color>());
+        encode_decode(rng.gen::<ContractId>());
+        encode_decode(rng.gen::<Bytes4>());
+        encode_decode(rng.gen::<Bytes8>());
+        encode_decode(rng.gen::<Bytes32>());
+        encode_decode(rng.gen::<Bytes64>());
+        encode_decode(rng.gen::<Salt>());
     }
 }
