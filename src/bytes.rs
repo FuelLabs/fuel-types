@@ -351,11 +351,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn padded_len_works() {
-        assert_eq!(0, padded_len(&[]));
-        assert_eq!(8, padded_len(&[0]));
-        assert_eq!(8, padded_len(&[0; 8]));
-        assert_eq!(16, padded_len(&[0; 9]));
+    fn padded_len_to_fit_word_len() {
+        assert_eq!(WORD_SIZE * 0, padded_len(&[]));
+        assert_eq!(WORD_SIZE * 1, padded_len(&[0]));
+        assert_eq!(WORD_SIZE * 1, padded_len(&[0; WORD_SIZE]));
+        assert_eq!(WORD_SIZE * 2, padded_len(&[0; WORD_SIZE + 1]));
+        assert_eq!(WORD_SIZE * 2, padded_len(&[0; WORD_SIZE * 2]));
     }
 
     #[test]
