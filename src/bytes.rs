@@ -8,13 +8,14 @@ pub trait SizedBytes {
 
 /// Return the word-padded length of the buffer
 pub const fn padded_len(bytes: &[u8]) -> usize {
-    let pad = bytes.len() % WORD_SIZE;
+    padded_len_usize(bytes.len())
+}
 
-    if pad == 0 {
-        bytes.len()
-    } else {
-        bytes.len() + WORD_SIZE - pad
-    }
+/// Return the word-padded length of an arbitrary length
+pub const fn padded_len_usize(len: usize) -> usize {
+    let pad = len % WORD_SIZE;
+
+    len + (pad != 0) as usize * (WORD_SIZE - pad)
 }
 
 /// Consume the initial bytes of a buffer to store a word.
