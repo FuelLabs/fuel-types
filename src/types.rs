@@ -94,6 +94,7 @@ macro_rules! key_methods {
             /// This function will not panic if the length of the slice is smaller than
             /// `Self::LEN`. Instead, it will cause undefined behavior and read random disowned
             /// bytes
+            #[cfg(feature = "std")]
             pub unsafe fn from_slice_unchecked(bytes: &[u8]) -> Self {
                 $i(bytes::from_slice_unchecked(bytes))
             }
