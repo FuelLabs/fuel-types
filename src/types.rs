@@ -27,6 +27,10 @@ macro_rules! key {
             feature = "serde-types-minimal",
             derive(serde::Serialize, serde::Deserialize)
         )]
+        #[cfg_attr(
+            feature = "scale",
+            derive(scale_codec::Encode, scale_codec::Decode, scale_info::TypeInfo)
+        )]
         pub struct $i([u8; $s]);
 
         key_methods!($i, $s);

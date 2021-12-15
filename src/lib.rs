@@ -2,6 +2,7 @@
 
 mod types;
 
+#[cfg(feature = "std")]
 pub mod bytes;
 pub use types::*;
 
