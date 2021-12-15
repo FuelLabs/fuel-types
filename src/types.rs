@@ -1,3 +1,4 @@
+#[cfg(feature = "std")]
 use crate::bytes;
 
 use core::array::TryFromSliceError;
