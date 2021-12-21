@@ -20,7 +20,7 @@ rand = { version = "0.8", default-features = false, features = ["std_rng"] }
 
 [features]
 default = ["std"]
-alloc = []
+alloc = ["serde/alloc"]
 random = ["rand"]
 serde-types = ["serde-types-minimal", "serde/default", "std"]
 serde-types-minimal = ["serde"]
