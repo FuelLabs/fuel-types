@@ -7,6 +7,8 @@ on:
     tags:
       - v*
   pull_request:
+  release:
+    types: [published]
 
 env:
   CARGO_TERM_COLOR: always
@@ -88,3 +90,29 @@ jobs:
       with:
         command: test
         args: --verbose --features serde-types
+
+  publish:
+    # Only do this job if publishing a release
+    needs: build
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Verify tag version
+        run: |
+          cargo install toml-cli
+          ./.github/workflows/scripts/verify_tag.sh ${{ github.ref_name }} Cargo.toml
+
+      - name: Publish crate
+        uses: katyo/publish-crates@v1
+        with:
+          registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}
