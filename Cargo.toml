@@ -13,6 +13,7 @@ description = "Atomic types of the FuelVM."
 [dependencies]
 rand = { version = "0.8", default-features = false, optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+serde-big-array = "0.3.2"
 
 [dev-dependencies]
 fuel-types = { path = ".", features = ["random"] }

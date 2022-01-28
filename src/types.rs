@@ -43,8 +43,22 @@ macro_rules! key {
 
 macro_rules! key_no_default {
     ($i:ident, $s:expr) => {
-        #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         // TODO serde is not implemented for arrays bigger than 32 bytes
+        // bring big_array into scope
+        use serde_big_array::big_array;
+        // define only that we need its use for 64 bytes
+        big_array! {
+            BigArray;
+            64,
+        }
+
+        #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[cfg_attr(
+                            feature = "serde-types-minimal",
+                            derive(serde::Serialize, serde::Deserialize),
+                            // add the big array attr to the serde use case
+                            serde(with = "BigArray")
+                        )]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
 
