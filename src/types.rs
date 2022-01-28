@@ -56,7 +56,6 @@ macro_rules! key_no_default {
         #[cfg_attr(
             feature = "serde-types-minimal",
             derive(serde::Serialize, serde::Deserialize),
-            // add the big array attr to the serde use case
             serde(with = "BigArray")
         )]
         /// FuelVM atomic type.
