@@ -55,8 +55,7 @@ macro_rules! key_no_default {
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         #[cfg_attr(
             feature = "serde-types-minimal",
-            derive(serde::Serialize, serde::Deserialize),
-            serde(with = "BigArray")
+            derive(serde::Serialize, serde::Deserialize)
         )]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
