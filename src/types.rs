@@ -41,15 +41,12 @@ macro_rules! key {
     };
 }
 
-macro_rules! key_no_default {
+macro_rules! key_no_default_large {
     ($i:ident, $s:expr) => {
-        // TODO serde is not implemented for arrays bigger than 32 bytes
-        // bring big_array into scope
         use serde_big_array::big_array;
-        // define only that we need its use for 64 bytes
         big_array! {
             BigArray;
-            64,
+            $s,
         }
 
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -58,7 +55,9 @@ macro_rules! key_no_default {
             derive(serde::Serialize, serde::Deserialize)
         )]
         /// FuelVM atomic type.
-        pub struct $i([u8; $s]);
+        pub struct $i(
+            #[cfg_attr(feature = "serde-types-minimal", serde(with = "BigArray"))] [u8; $s],
+        );
 
         key_methods!($i, $s);
 
@@ -243,7 +242,7 @@ key!(Bytes8, 8);
 key!(Bytes32, 32);
 key!(Salt, 32);
 
-key_no_default!(Bytes64, 64);
+key_no_default_large!(Bytes64, 64);
 
 impl ContractId {
     /// Seed for the calculation of the contract id from its code.
