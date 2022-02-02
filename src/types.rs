@@ -41,7 +41,7 @@ macro_rules! key {
     };
 }
 
-macro_rules! key_no_default_large {
+macro_rules! key_with_big_array {
     ($i:ident, $s:expr) => {
         use serde_big_array::big_array;
         big_array! {
@@ -242,7 +242,7 @@ key!(Bytes8, 8);
 key!(Bytes32, 32);
 key!(Salt, 32);
 
-key_no_default_large!(Bytes64, 64);
+key_with_big_array!(Bytes64, 64);
 
 impl ContractId {
     /// Seed for the calculation of the contract id from its code.
