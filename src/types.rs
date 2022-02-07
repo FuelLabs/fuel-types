@@ -1,3 +1,4 @@
+// serde-big-array doesn't allow documentation of its generated structure
 #![allow(missing_docs)]
 use crate::bytes;
 
