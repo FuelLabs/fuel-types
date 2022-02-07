@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use crate::bytes;
 
 use core::array::TryFromSliceError;
@@ -43,7 +44,9 @@ macro_rules! key {
 
 macro_rules! key_with_big_array {
     ($i:ident, $s:expr) => {
+        #[cfg(feature = "serde-types-minimal")]
         use serde_big_array::big_array;
+        #[cfg(feature = "serde-types-minimal")]
         big_array! {
             BigArray;
             $s,
