@@ -184,7 +184,7 @@ macro_rules! key_methods {
                 }
 
                 match f.width() {
-                    Some(w) if w > 0 => self.0.chunks(Self::LEN / w).try_for_each(|c| {
+                    Some(w) if w > 0 => self.0.chunks(2 * Self::LEN / w).try_for_each(|c| {
                         write!(f, "{:02x}", c.iter().fold(0u8, |acc, x| acc ^ x))
                     }),
 
@@ -200,7 +200,7 @@ macro_rules! key_methods {
                 }
 
                 match f.width() {
-                    Some(w) if w > 0 => self.0.chunks(Self::LEN / w).try_for_each(|c| {
+                    Some(w) if w > 0 => self.0.chunks(2 * Self::LEN / w).try_for_each(|c| {
                         write!(f, "{:02X}", c.iter().fold(0u8, |acc, x| acc ^ x))
                     }),
 

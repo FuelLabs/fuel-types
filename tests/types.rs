@@ -99,15 +99,9 @@ fn hex_encoding() {
         assert_eq!(t, upper);
         assert_eq!(t, upper_alternate);
 
-        let mut buf = [0u8; 2];
+        let reduced = t.as_ref().iter().fold(0u8, |acc, x| acc ^ x);
 
-        buf.iter_mut()
-            .zip(t.as_ref().chunks(t.as_ref().len() / 2))
-            .for_each(|(b, c)| {
-                *b = c.iter().fold(0u8, |acc, x| acc ^ x);
-            });
-
-        let x = hex::encode(buf);
+        let x = hex::encode(&[reduced]);
         let y = format!("{:2x}", t);
 
         assert_eq!(x, y);
