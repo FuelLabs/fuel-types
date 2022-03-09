@@ -105,6 +105,14 @@ fn hex_encoding() {
         let y = format!("{:2x}", t);
 
         assert_eq!(x, y);
+
+        let x = format!("{:0x}", t).len();
+        let y = format!("{:2x}", t).len();
+        let z = format!("{:4x}", t).len();
+
+        assert_eq!(t.as_ref().len() * 2, x);
+        assert_eq!(2, y);
+        assert_eq!(4, z);
     }
 
     let rng = &mut StdRng::seed_from_u64(8586);
