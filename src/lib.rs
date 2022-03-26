@@ -8,6 +8,7 @@ extern crate alloc;
 
 mod types;
 
+use bounded_integer::bounded_integer;
 pub use types::*;
 
 /// Word-aligned bytes serialization functions.
@@ -19,14 +20,22 @@ pub type RegisterId = usize;
 /// Register value type
 pub type Word = u64;
 
-/// 6-bits immediate value type
-pub type Immediate06 = u8;
+bounded_integer! {
+    /// 6-bits immediate value type
+    pub struct Immediate06 { 0..64 }
+}
 
-/// 12-bits immediate value type
-pub type Immediate12 = u16;
+bounded_integer! {
+    /// 12-bits immediate value type
+    pub struct Immediate12 { 0..4096 }
+}
 
-/// 18-bits immediate value type
-pub type Immediate18 = u32;
+bounded_integer! {
+    /// 18-bits immediate value type
+    pub struct Immediate18 { 0..262144 }
+}
 
-/// 24-bits immediate value type
-pub type Immediate24 = u32;
+bounded_integer! {
+    /// 24-bits immediate value type
+    pub struct Immediate24 { 0..16777216 }
+}
