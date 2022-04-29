@@ -144,7 +144,7 @@ pub unsafe fn restore_usize_unchecked(buf: &[u8]) -> (usize, &[u8]) {
 
 /// Copy `array` into `buf` and return the remainder bytes of `buf`
 ///
-/// # Panics
+/// # Safety
 ///
 /// This function will panic if the length of `buf` is smaller than `N`
 pub fn store_array_unchecked<'a, const N: usize>(
