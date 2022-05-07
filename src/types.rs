@@ -25,10 +25,6 @@ const fn hex_val(c: u8) -> Option<u8> {
 macro_rules! key {
     ($i:ident, $s:expr) => {
         #[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-        #[cfg_attr(
-            feature = "serde-types-minimal",
-            derive(serde::Serialize, serde::Deserialize)
-        )]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
 
@@ -45,23 +41,9 @@ macro_rules! key {
 
 macro_rules! key_with_big_array {
     ($i:ident, $s:expr) => {
-        #[cfg(feature = "serde-types-minimal")]
-        use serde_big_array::big_array;
-        #[cfg(feature = "serde-types-minimal")]
-        big_array! {
-            BigArray;
-            $s,
-        }
-
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-        #[cfg_attr(
-            feature = "serde-types-minimal",
-            derive(serde::Serialize, serde::Deserialize)
-        )]
         /// FuelVM atomic type.
-        pub struct $i(
-            #[cfg_attr(feature = "serde-types-minimal", serde(with = "BigArray"))] [u8; $s],
-        );
+        pub struct $i([u8; $s]);
 
         key_methods!($i, $s);
 
@@ -246,6 +228,44 @@ macro_rules! key_methods {
                     *r = h << 4 | l;
                 }
 
+                Ok(ret)
+            }
+        }
+
+        #[cfg(feature = "serde-types-minimal")]
+        impl serde::Serialize for $i {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                serializer.serialize_str(&self.to_string())
+            }
+        }
+
+        #[cfg(feature = "serde-types-minimal")]
+        impl<'de> serde::Deserialize<'de> for $i {
+            fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+            where
+                D: serde::Deserializer<'de>,
+            {
+                use serde::de::Error;
+                const ERR: &str = "Invalid encoded byte";
+                let s: &str = serde::Deserialize::deserialize(deserializer)?;
+                let mut b = s.bytes();
+                let mut ret = $i::zeroed();
+                for r in ret.as_mut() {
+                    let h = b
+                        .next()
+                        .and_then(hex_val)
+                        .ok_or(ERR)
+                        .map_err(D::Error::custom)?;
+                    let l = b
+                        .next()
+                        .and_then(hex_val)
+                        .ok_or(ERR)
+                        .map_err(D::Error::custom)?;
+                    *r = h << 4 | l;
+                }
                 Ok(ret)
             }
         }

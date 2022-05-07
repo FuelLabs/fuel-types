@@ -136,3 +136,13 @@ fn test_key_with_big_array() {
     let s_back = serde_json::from_str(&j).unwrap();
     assert!(s == s_back);
 }
+
+#[test]
+#[cfg(feature = "serde-types-minimal")]
+fn test_key() {
+    let rng = &mut StdRng::seed_from_u64(8586);
+    let s: Bytes32 = rng.gen();
+    let j = serde_json::to_string(&s).unwrap();
+    let s_back = serde_json::from_str(&j).unwrap();
+    assert!(s == s_back);
+}
