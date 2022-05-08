@@ -128,7 +128,7 @@ fn hex_encoding() {
 }
 
 #[test]
-#[cfg(feature = "serde-types-minimal")]
+#[cfg(feature = "serde")]
 fn test_key_with_big_array() {
     let rng = &mut StdRng::seed_from_u64(8586);
     let s: Bytes64 = rng.gen();
