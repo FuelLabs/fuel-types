@@ -250,24 +250,8 @@ macro_rules! key_methods {
                 D: serde::Deserializer<'de>,
             {
                 use serde::de::Error;
-                const ERR: &str = "Invalid encoded byte";
                 let s: &str = serde::Deserialize::deserialize(deserializer)?;
-                let mut b = s.bytes();
-                let mut ret = $i::zeroed();
-                for r in ret.as_mut() {
-                    let h = b
-                        .next()
-                        .and_then(hex_val)
-                        .ok_or(ERR)
-                        .map_err(D::Error::custom)?;
-                    let l = b
-                        .next()
-                        .and_then(hex_val)
-                        .ok_or(ERR)
-                        .map_err(D::Error::custom)?;
-                    *r = h << 4 | l;
-                }
-                Ok(ret)
+                s.parse().map_err(D::Error::custom)
             }
         }
     };
