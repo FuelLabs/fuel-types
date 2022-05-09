@@ -238,8 +238,7 @@ macro_rules! key_methods {
             where
                 S: serde::Serializer,
             {
-                use crate::alloc::string::ToString;
-                serializer.serialize_str(&self.to_string())
+                serializer.serialize_str(&format!("{:#x}", &self))
             }
         }
 
