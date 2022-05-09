@@ -129,17 +129,6 @@ fn hex_encoding() {
 
 #[test]
 #[cfg(feature = "serde")]
-fn test_key_with_big_array_serde() {
-    let rng = &mut StdRng::seed_from_u64(8586);
-    let bytes64: Bytes64 = rng.gen();
-    let bytes64_t = bincode::serialize(&bytes64).expect("Failed to serialize Bytes64");
-    let bytes64_t: Bytes64 =
-        bincode::deserialize(&bytes64_t).expect("Failed to deserialize Bytes64");
-    assert_eq!(bytes64, bytes64_t);
-}
-
-#[test]
-#[cfg(feature = "serde")]
 fn test_key_serde() {
     let rng = &mut StdRng::seed_from_u64(8586);
     let adr: Address = rng.gen();
@@ -149,6 +138,7 @@ fn test_key_serde() {
     let bytes8: Bytes8 = rng.gen();
     let bytes32: Bytes32 = rng.gen();
     let salt: Salt = rng.gen();
+    let bytes64: Bytes64 = rng.gen();
 
     let adr_t = bincode::serialize(&adr).expect("Failed to serialize Address");
     let adr_t: Address = bincode::deserialize(&adr_t).expect("Failed to deserialize Address");
@@ -179,4 +169,9 @@ fn test_key_serde() {
     let salt_t = bincode::serialize(&salt).expect("Failed to serialize Salt");
     let salt_t: Salt = bincode::deserialize(&salt_t).expect("Failed to deserialize Salt");
     assert_eq!(salt, salt_t);
+
+    let bytes64_t = bincode::serialize(&bytes64).expect("Failed to serialize Bytes64");
+    let bytes64_t: Bytes64 =
+        bincode::deserialize(&bytes64_t).expect("Failed to deserialize Bytes64");
+    assert_eq!(bytes64, bytes64_t);
 }
