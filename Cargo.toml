@@ -25,5 +25,5 @@ rand = { version = "0.8", default-features = false, features = ["std_rng"] }
 default = ["std", "serde?/default"]
 alloc = ["serde?/alloc"]
 random = ["rand"]
-serde = ["dep:serde"]
+serde = ["dep:serde", "alloc"]
 std = ["alloc", "serde?/std"]
