@@ -238,7 +238,7 @@ macro_rules! key_methods {
             where
                 S: serde::Serializer,
             {
-                serializer.serialize_str(&format!("{:#x}", &self))
+                serializer.serialize_str(&format!("{:x}", &self))
             }
         }
 
