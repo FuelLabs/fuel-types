@@ -238,6 +238,7 @@ macro_rules! key_methods {
             where
                 S: serde::Serializer,
             {
+                use alloc::format;
                 serializer.serialize_str(&format!("{:x}", &self))
             }
         }
