@@ -232,7 +232,7 @@ macro_rules! key_methods {
             }
         }
 
-        #[cfg(feature = "serde-types-minimal")]
+        #[cfg(feature = "serde")]
         impl serde::Serialize for $i {
             fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where
@@ -242,7 +242,7 @@ macro_rules! key_methods {
             }
         }
 
-        #[cfg(feature = "serde-types-minimal")]
+        #[cfg(feature = "serde")]
         impl<'de> serde::Deserialize<'de> for $i {
             fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
             where
