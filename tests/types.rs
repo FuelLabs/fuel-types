@@ -170,7 +170,8 @@ fn test_key_serde() {
     assert_eq!(bytes32, bytes32_t);
 
     let message_id_t = bincode::serialize(&message_id).expect("Failed to serialize MessageId");
-    let message_id_t: MessageId = bincode::deserialize(&message_id_t).expect("Failed to deserialize MessageId");
+    let message_id_t: MessageId =
+        bincode::deserialize(&message_id_t).expect("Failed to deserialize MessageId");
     assert_eq!(message_id, message_id_t);
 
     let salt_t = bincode::serialize(&salt).expect("Failed to serialize Salt");
