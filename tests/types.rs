@@ -168,7 +168,8 @@ fn test_key_serde() {
     assert_eq!(bytes8, bytes8_t);
 
     let bytes20_t = bincode::serialize(&bytes20).expect("Failed to serialize Bytes20");
-    let bytes20_t: Bytes20 = bincode::deserialize(&bytes20_t).expect("Failed to deserialize Bytes20");
+    let bytes20_t: Bytes20 =
+        bincode::deserialize(&bytes20_t).expect("Failed to deserialize Bytes20");
     assert_eq!(bytes20, bytes20_t);
 
     let bytes32_t = bincode::serialize(&bytes32).expect("Failed to serialize Bytes32");
