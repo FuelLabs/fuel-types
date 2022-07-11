@@ -102,16 +102,19 @@ macro_rules! key_methods {
 
             /// Add a conversion from arbitrary slices into owned
             ///
-            /// # Warning
+            /// # Safety
             ///
-            /// This function will not panic if the length of the slice is smaller than
-            /// `Self::LEN`. Instead, it will cause undefined behavior and read random disowned
-            /// bytes
+            /// This will cause undefined behavior if the length of the slice is smaller than
+            /// `Self::LEN`.
             pub unsafe fn from_slice_unchecked(bytes: &[u8]) -> Self {
                 $i(bytes::from_slice_unchecked(bytes))
             }
 
             /// Copy-free reference cast
+            ///
+            /// # Safety
+            ///
+            /// Given bytes must be a valid value of this type
             pub unsafe fn as_ref_unchecked(bytes: &[u8]) -> &Self {
                 // The interpreter will frequently make references to keys and values using
                 // logically checked slices.
