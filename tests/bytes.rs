@@ -46,7 +46,8 @@ fn store_restore_number_unchecked_works() {
 
 #[test]
 fn store_restore_number_checked_works() {
-    fn store_restore<T>(n: T, x: usize, f: fn(&[u8]) -> Option<(T, &[u8])>)
+    type Func<T> = fn(&[u8]) -> Option<(T, &[u8])>;
+    fn store_restore<T>(n: T, x: usize, f: Func<T>)
     where
         T: core::fmt::Debug + Copy + Eq,
         Word: From<T>,
