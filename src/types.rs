@@ -24,6 +24,8 @@ const fn hex_val(c: u8) -> Option<u8> {
 
 macro_rules! key {
     ($i:ident, $s:expr) => {
+        // Needed to ensure the as_ref_* memory layout is correct.
+        #[repr(transparent)]
         #[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
@@ -41,6 +43,8 @@ macro_rules! key {
 
 macro_rules! key_with_big_array {
     ($i:ident, $s:expr) => {
+        // Needed to ensure the as_ref_* memory layout is correct.
+        #[repr(transparent)]
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
@@ -82,6 +86,7 @@ macro_rules! key_methods {
                 $i([0; $s])
             }
 
+            #[cfg(feature = "unsafe_rust")]
             /// Add a conversion from arbitrary slices into owned
             ///
             /// # Safety
@@ -93,6 +98,17 @@ macro_rules! key_methods {
                 $i(bytes::from_slice_unchecked(bytes))
             }
 
+            /// Add a conversion from arbitrary slices into owned
+            ///
+            /// # Panics
+            ///
+            /// This function will panic if the length of the slice is smaller than
+            /// `Self::LEN`.
+            pub fn from_slice(bytes: &[u8]) -> Option<Self> {
+                Some($i(bytes::from_slice_checked(bytes)?))
+            }
+
+            #[cfg(feature = "unsafe_rust")]
             /// Copy-free reference cast
             /// # Safety
             /// Assumes byte slice is the same length as this type.
@@ -105,6 +121,21 @@ macro_rules! key_methods {
                 &*(bytes.as_ptr() as *const Self)
             }
 
+            /// Copy-free reference cast
+            pub fn as_ref_checked(bytes: &[u8]) -> Option<&Self> {
+                let inner: &[u8; Self::LEN] = bytes.try_into().ok()?;
+
+                // The interpreter will frequently make references to keys and values using
+                // logically checked slices.
+                //
+                // This function will save unnecessary copy to owned slices for the interpreter
+                // access
+                //
+                // The size is checked above and Self is `#[repr(transparent)]`
+                // so the layout is guaranteed to be correct.
+                Some(unsafe { &*(inner.as_ptr() as *const Self) })
+            }
+            
             /// The memory size of the type by the method.
             pub const fn size(&self) -> usize {
                 Self::LEN

@@ -5,44 +5,57 @@ use rand::{Rng, RngCore, SeedableRng};
 use core::{fmt, str};
 
 macro_rules! check_consistency {
-    ($i:ident,$r:expr,$b:expr) => {
-        unsafe {
-            let n = $i::LEN;
-            let s = $r.gen_range(0..$b.len() - n);
-            let e = $r.gen_range(s + n..$b.len());
-            let r = $r.gen_range(1..n - 1);
-            let i = &$b[s..s + n];
+    ($i:ident,$r:expr,$b:expr) => {{
+        let n = $i::LEN;
+        let s = $r.gen_range(0..$b.len() - n);
+        let e = $r.gen_range(s + n..$b.len());
+        #[cfg(feature = "unsafe_rust")]
+        let r = $r.gen_range(1..n - 1);
+        let i = &$b[s..s + n];
 
-            let a = $i::from_slice_unchecked(i);
-            let b = $i::from_slice_unchecked(&$b[s..e]);
-            let c = $i::try_from(i).expect("Memory conversion");
+        #[cfg(feature = "unsafe_rust")]
+        let a = unsafe { $i::from_slice_unchecked(i) };
+        #[cfg(not(feature = "unsafe_rust"))]
+        let a = $i::from_slice(i).unwrap();
 
-            // `d` will create random smaller slices and expect the value to be parsed correctly
-            //
-            // However, this is not the expected usage of the function
-            let d = $i::from_slice_unchecked(&i[..i.len() - r]);
+        #[cfg(feature = "unsafe_rust")]
+        let b = unsafe { $i::from_slice_unchecked(&$b[s..e]) };
+        #[cfg(not(feature = "unsafe_rust"))]
+        let b = $i::from_slice(&$b[s..e]).unwrap();
 
-            let e = $i::as_ref_unchecked(i);
+        let c = $i::try_from(i).expect("Memory conversion");
 
-            // Assert `from_slice_unchecked` will not create two references to the same owned
-            // memory
-            assert_ne!(a.as_ptr(), b.as_ptr());
+        // `d` will create random smaller slices and expect the value to be parsed correctly
+        //
+        // However, this is not the expected usage of the function
+        #[cfg(feature = "unsafe_rust")]
+        let d = unsafe { $i::from_slice_unchecked(&i[..i.len() - r]) };
 
-            // Assert `as_ref_unchecked` is copy-free
-            assert_ne!(e.as_ptr(), a.as_ptr());
-            assert_eq!(e.as_ptr(), i.as_ptr());
+        #[cfg(feature = "unsafe_rust")]
+        let e = unsafe { $i::as_ref_unchecked(i) };
+        #[cfg(not(feature = "unsafe_rust"))]
+        let e = $i::as_ref_checked(i).unwrap();
 
-            assert_eq!(a, b);
-            assert_eq!(a, c);
-            assert_eq!(a, d);
-            assert_eq!(&a, e);
-            assert_eq!(a.len(), $i::LEN);
-            assert_eq!(b.len(), $i::LEN);
-            assert_eq!(c.len(), $i::LEN);
-            assert_eq!(d.len(), $i::LEN);
-            assert_eq!(e.len(), $i::LEN);
-        }
-    };
+        // Assert `from_slice_unchecked` will not create two references to the same owned
+        // memory
+        assert_ne!(a.as_ptr(), b.as_ptr());
+
+        // Assert `as_ref_unchecked` is copy-free
+        assert_ne!(e.as_ptr(), a.as_ptr());
+        assert_eq!(e.as_ptr(), i.as_ptr());
+
+        assert_eq!(a, b);
+        assert_eq!(a, c);
+        #[cfg(feature = "unsafe_rust")]
+        assert_eq!(a, d);
+        assert_eq!(&a, e);
+        assert_eq!(a.len(), $i::LEN);
+        assert_eq!(b.len(), $i::LEN);
+        assert_eq!(c.len(), $i::LEN);
+        #[cfg(feature = "unsafe_rust")]
+        assert_eq!(d.len(), $i::LEN);
+        assert_eq!(e.len(), $i::LEN);
+    }};
 }
 
 #[test]
