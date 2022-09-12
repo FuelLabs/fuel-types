@@ -69,6 +69,8 @@ jobs:
           - command: test
             args: --all-targets --all-features
           - command: test
+            args: --all-targets # Test default features including safe api.
+          - command: test
             args: --all-targets --no-default-features
           - command: test
             args: --all-targets --no-default-features --features serde
