@@ -9,18 +9,18 @@ macro_rules! check_consistency {
         let n = $i::LEN;
         let s = $r.gen_range(0..$b.len() - n);
         let e = $r.gen_range(s + n..$b.len());
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         let r = $r.gen_range(1..n - 1);
         let i = &$b[s..s + n];
 
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         let a = unsafe { $i::from_slice_unchecked(i) };
-        #[cfg(not(feature = "unsafe_rust"))]
+        #[cfg(not(feature = "optimized"))]
         let a = $i::from_slice(i).unwrap();
 
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         let b = unsafe { $i::from_slice_unchecked(&$b[s..e]) };
-        #[cfg(not(feature = "unsafe_rust"))]
+        #[cfg(not(feature = "optimized"))]
         let b = $i::from_slice(&$b[s..e]).unwrap();
 
         let c = $i::try_from(i).expect("Memory conversion");
@@ -28,25 +28,30 @@ macro_rules! check_consistency {
         // `d` will create random smaller slices and expect the value to be parsed correctly
         //
         // However, this is not the expected usage of the function
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         let d = unsafe { $i::from_slice_unchecked(&i[..i.len() - r]) };
 
-        #[cfg(feature = "unsafe_rust")]
-        let e = unsafe { $i::as_ref_unchecked(i) };
-        #[cfg(not(feature = "unsafe_rust"))]
+        #[cfg(feature = "optimized")]
         let e = $i::as_ref_checked(i).unwrap();
+        #[cfg(not(feature = "optimized"))]
+        let e = $i::from_slice(i).unwrap();
+        #[cfg(not(feature = "optimized"))]
+        let e = &e;
 
-        // Assert `from_slice_unchecked` will not create two references to the same owned
+        // Assert `from_slice_checked` will not create two references to the same owned
         // memory
         assert_ne!(a.as_ptr(), b.as_ptr());
 
-        // Assert `as_ref_unchecked` is copy-free
-        assert_ne!(e.as_ptr(), a.as_ptr());
-        assert_eq!(e.as_ptr(), i.as_ptr());
+        #[cfg(feature = "optimized")]
+        {
+            // Assert `as_ref_checked` is copy-free
+            assert_ne!(e.as_ptr(), a.as_ptr());
+            assert_eq!(e.as_ptr(), i.as_ptr());
+        }
 
         assert_eq!(a, b);
         assert_eq!(a, c);
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         assert_eq!(a, d);
         assert_eq!(&a, e);
         assert_eq!(a.len(), $i::LEN);

@@ -2,6 +2,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
+#![cfg_attr(not(feature = "optimized"), forbid(unsafe_code))]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

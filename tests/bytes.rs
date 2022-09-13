@@ -13,7 +13,7 @@ fn padded_len_to_fit_word_len() {
 }
 
 #[test]
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 fn store_restore_number_unchecked_works() {
     fn store_restore<T>(n: T, x: usize, f: unsafe fn(&[u8]) -> (T, &[u8]))
     where

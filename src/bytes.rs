@@ -70,7 +70,7 @@ where
     Some(&mut buf[WORD_SIZE..])
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Read the initial bytes of a buffer to fetch a word.
 ///
 /// Return the read word and the remainder of the buffer
@@ -105,7 +105,7 @@ where
     from_slice_checked(buf).map(|number| (Word::from_be_bytes(number).into(), &buf[WORD_SIZE..]))
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Read the initial bytes of a buffer to fetch a word.
 ///
 /// Return the read word and the remainder of the buffer
@@ -134,7 +134,7 @@ pub fn restore_word_checked(buf: &[u8]) -> Option<(Word, &[u8])> {
     from_slice_checked(buf).map(|number| (Word::from_be_bytes(number), &buf[WORD_SIZE..]))
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Read the a word-padded u8 from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -163,7 +163,7 @@ pub fn restore_u8_checked(buf: &[u8]) -> Option<(u8, &[u8])> {
     from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as u8, &buf[WORD_SIZE..]))
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Read the a word-padded u16 from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -192,7 +192,7 @@ pub fn restore_u16_checked(buf: &[u8]) -> Option<(u16, &[u8])> {
     from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as u16, &buf[WORD_SIZE..]))
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Read the a word-padded u32 from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -221,7 +221,7 @@ pub fn restore_u32_checked(buf: &[u8]) -> Option<(u32, &[u8])> {
     from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as u32, &buf[WORD_SIZE..]))
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Read the a word-padded usize from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -250,7 +250,7 @@ pub fn restore_usize_checked(buf: &[u8]) -> Option<(usize, &[u8])> {
     from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as usize, &buf[WORD_SIZE..]))
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Copy `array` into `buf` and return the remainder bytes of `buf`
 ///
 /// # Panics
@@ -278,7 +278,7 @@ pub fn store_array_checked<'a, const N: usize>(
     Some(&mut buf[N..])
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Read an array of `N` bytes from `buf`.
 ///
 /// Return the read array and the remainder bytes.
@@ -304,7 +304,7 @@ pub fn restore_array_checked<const N: usize>(buf: &[u8]) -> Option<([u8; N], &[u
     Some((from_slice_checked(buf)?, &buf[N..]))
 }
 
-#[cfg(feature = "unsafe_rust")]
+#[cfg(feature = "optimized")]
 /// Add a conversion from arbitrary slices into arrays
 ///
 /// # Safety
@@ -457,10 +457,10 @@ mod use_std {
         // Safety: chunks_exact will guarantee the size of the slice is correct
         let len = buf.chunks_exact(WORD_SIZE).next();
 
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         let len = len.map(|b| unsafe { from_slice_unchecked(b) });
 
-        #[cfg(not(feature = "unsafe_rust"))]
+        #[cfg(not(feature = "optimized"))]
         let len = len.and_then(from_slice_checked);
 
         let len = len
@@ -519,10 +519,10 @@ mod use_std {
         // Safe checked memory bounds
         let number = buf.chunks_exact(WORD_SIZE).next();
 
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         let number = number.map(|b| unsafe { from_slice_unchecked(b) });
 
-        #[cfg(not(feature = "unsafe_rust"))]
+        #[cfg(not(feature = "optimized"))]
         let number = number.and_then(from_slice_checked);
 
         let number = number

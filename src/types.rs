@@ -86,7 +86,7 @@ macro_rules! key_methods {
                 $i([0; $s])
             }
 
-            #[cfg(feature = "unsafe_rust")]
+            #[cfg(feature = "optimized")]
             /// Add a conversion from arbitrary slices into owned
             ///
             /// # Safety
@@ -108,19 +108,7 @@ macro_rules! key_methods {
                 Some($i(bytes::from_slice_checked(bytes)?))
             }
 
-            #[cfg(feature = "unsafe_rust")]
-            /// Copy-free reference cast
-            /// # Safety
-            /// Assumes byte slice is the same length as this type.
-            pub unsafe fn as_ref_unchecked(bytes: &[u8]) -> &Self {
-                // The interpreter will frequently make references to keys and values using
-                // logically checked slices.
-                //
-                // This function will save unnecessary copy to owned slices for the interpreter
-                // access
-                &*(bytes.as_ptr() as *const Self)
-            }
-
+            #[cfg(feature = "optimized")]
             /// Copy-free reference cast
             pub fn as_ref_checked(bytes: &[u8]) -> Option<&Self> {
                 let inner: &[u8; Self::LEN] = bytes.try_into().ok()?;
