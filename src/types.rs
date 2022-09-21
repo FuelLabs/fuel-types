@@ -13,8 +13,6 @@ use rand::{
     Rng,
 };
 
-pub const BASE_ASSET: AssetId = AssetId::zeroed();
-
 const fn hex_val(c: u8) -> Option<u8> {
     match c {
         b'A'..=b'F' => Some(c - b'A' + 10),
@@ -276,4 +274,9 @@ impl ContractId {
     ///
     /// <https://github.com/FuelLabs/fuel-specs/blob/master/specs/protocol/identifiers.md#contract-id>
     pub const SEED: [u8; 4] = 0x4655454C_u32.to_be_bytes();
+}
+
+impl AssetId {
+    /// The base native asset of the Fuel protocol.
+    pub const BASE: AssetId = AssetId::zeroed();
 }
