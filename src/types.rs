@@ -13,6 +13,8 @@ use rand::{
     Rng,
 };
 
+pub const BASE_ASSET: AssetId = AssetId::zeroed();
+
 const fn hex_val(c: u8) -> Option<u8> {
     match c {
         b'A'..=b'F' => Some(c - b'A' + 10),
