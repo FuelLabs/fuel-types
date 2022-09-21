@@ -13,3 +13,4 @@ Rust implementation of the atomic types for the [FuelVM](https://github.com/Fuel
 - `alloc`: Use [Vec](https://doc.rust-lang.org/alloc/vec/struct.Vec.html) from [alloc](https://doc.rust-lang.org/alloc/index.html) for `no-std`.
 - `random`: Implement `no-std` [rand](https://crates.io/crates/rand) features for the provided types.
 - `serde`: Add support for [serde](https://crates.io/crates/serde) for the provided types.
+- 
