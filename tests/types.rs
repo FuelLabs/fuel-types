@@ -205,8 +205,7 @@ fn test_key_serde() {
     assert_eq!(bytes64, bytes64_t);
 
     let uxto_id_t = bincode::serialize(&uxto_id).expect("Failed to serialize UtxoId");
-    let uxto_id_t: UtxoId =
-        bincode::deserialize(&uxto_id_t).expect("Failed to deserialize UtxoId");
+    let uxto_id_t: UtxoId = bincode::deserialize(&uxto_id_t).expect("Failed to deserialize UtxoId");
     assert_eq!(uxto_id, uxto_id_t);
 }
 
