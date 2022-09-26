@@ -134,7 +134,7 @@ impl TryFrom<&[u8]> for CoinId {
     type Error = TryFromSliceError;
 
     fn try_from(bytes: &[u8]) -> Result<CoinId, TryFromSliceError> {
-        Ok(CoinId::new(<[u8; 33]>::try_from(bytes).map(|b| b.into())?))
+        Ok(CoinId::new(<[u8; 33]>::try_from(bytes)?))
     }
 }
 
@@ -180,13 +180,13 @@ impl fmt::UpperHex for CoinId {
 
 impl fmt::Debug for CoinId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as fmt::LowerHex>::fmt(&self, f)
+        <Self as fmt::LowerHex>::fmt(self, f)
     }
 }
 
 impl fmt::Display for CoinId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        <Self as fmt::LowerHex>::fmt(&self, f)
+        <Self as fmt::LowerHex>::fmt(self, f)
     }
 }
 

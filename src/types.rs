@@ -214,13 +214,13 @@ macro_rules! key_methods {
 
         impl fmt::Debug for $i {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                <Self as fmt::LowerHex>::fmt(&self, f)
+                <Self as fmt::LowerHex>::fmt(self, f)
             }
         }
 
         impl fmt::Display for $i {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                <Self as fmt::LowerHex>::fmt(&self, f)
+                <Self as fmt::LowerHex>::fmt(self, f)
             }
         }
 
