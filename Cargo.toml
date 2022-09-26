@@ -11,9 +11,9 @@ repository = "https://github.com/FuelLabs/fuel-types"
 description = "Atomic types of the FuelVM."
 
 [dependencies]
-zerocopy = "0.6"
 rand = { version = "0.8", default-features = false, optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive", "alloc"], optional = true }
+zerocopy = "0.6"
 
 [dev-dependencies]
 bincode = "1.3"
