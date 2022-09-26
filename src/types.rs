@@ -6,6 +6,7 @@ use core::array::TryFromSliceError;
 use core::convert::TryFrom;
 use core::ops::{Deref, DerefMut};
 use core::{fmt, str};
+use zerocopy::{AsBytes, FromBytes};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -13,7 +14,7 @@ use rand::{
     Rng,
 };
 
-const fn hex_val(c: u8) -> Option<u8> {
+pub(crate) const fn hex_val(c: u8) -> Option<u8> {
     match c {
         b'A'..=b'F' => Some(c - b'A' + 10),
         b'a'..=b'f' => Some(c - b'a' + 10),
@@ -25,7 +26,7 @@ const fn hex_val(c: u8) -> Option<u8> {
 macro_rules! key {
     ($i:ident, $s:expr) => {
         #[repr(transparent)]
-        #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsBytes, FromBytes)]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
 
@@ -277,18 +278,15 @@ macro_rules! key_methods {
 
 key!(Address, 32);
 key!(AssetId, 32);
-key!(ContractId, 32);
 key!(Bytes4, 4);
 key!(Bytes8, 8);
 key!(Bytes20, 20);
+key_with_big_array!(Bytes64, 64);
 key!(Bytes32, 32);
+key!(ContractId, 32);
 key!(MessageId, 32);
 key!(Salt, 32);
-key!(UtxoId, 33);
-
-pub type TxId = Bytes32;
-
-key_with_big_array!(Bytes64, 64);
+key!(TxId, 32);
 
 impl ContractId {
     /// Seed for the calculation of the contract id from its code.
@@ -300,28 +298,4 @@ impl ContractId {
 impl AssetId {
     /// The base native asset of the Fuel protocol.
     pub const BASE: AssetId = AssetId::zeroed();
-}
-
-impl UtxoId {
-    pub const fn tx_id(&self) -> TxId {
-        let r = self.0;
-
-        #[rustfmt::skip]
-        let tx_id: [u8; TxId::LEN] = [
-            r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
-            r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15],
-            r[16], r[17], r[18], r[19], r[20], r[21], r[22], r[23],
-            r[24], r[25], r[26], r[27], r[28], r[29], r[30], r[31],
-        ];
-
-        TxId::new(tx_id)
-    }
-
-    pub const fn output_index(&self) -> u8 {
-        self.0[TxId::LEN]
-    }
-
-    pub fn replace_tx_id(&mut self, tx_id: TxId) {
-        self.as_mut()[..TxId::LEN].copy_from_slice(tx_id.as_ref());
-    }
 }

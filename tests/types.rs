@@ -63,7 +63,29 @@ fn from_slice_unchecked_safety() {
         check_consistency!(Bytes64, rng, bytes);
         check_consistency!(MessageId, rng, bytes);
         check_consistency!(Salt, rng, bytes);
-        check_consistency!(UtxoId, rng, bytes);
+
+        unsafe {
+            let n = CoinId::LEN;
+            let s = rng.gen_range(0..bytes.len() - n);
+            let e = rng.gen_range(s + n..bytes.len());
+            let r = rng.gen_range(1..n - 1);
+            let i = &bytes[s..s + n];
+
+            let a = CoinId::from_slice_unchecked(i);
+            let b = CoinId::from_slice_unchecked(&bytes[s..e]);
+            let c = CoinId::try_from(i).expect("Memory conversion");
+
+            // `d` will create random smaller slices and expect the value to be parsed correctly
+            //
+            // However, this is not the expected usage of the function
+            let d = CoinId::from_slice_unchecked(&i[..i.len() - r]);
+
+            let e = CoinId::as_ref_unchecked(i);
+            assert_eq!(a, b);
+            assert_eq!(a, c);
+            assert_eq!(a, d);
+            assert_eq!(&a, e);
+        }
     }
 }
 
@@ -140,7 +162,7 @@ fn hex_encoding() {
     encode_decode::<Bytes64>(rng.gen());
     encode_decode::<MessageId>(rng.gen());
     encode_decode::<Salt>(rng.gen());
-    encode_decode::<UtxoId>(rng.gen());
+    encode_decode::<CoinId>(rng.gen());
 }
 
 #[test]
@@ -157,7 +179,7 @@ fn test_key_serde() {
     let message_id: MessageId = rng.gen();
     let salt: Salt = rng.gen();
     let bytes64: Bytes64 = rng.gen();
-    let uxto_id: UtxoId = rng.gen();
+    let uxto_id: CoinId = rng.gen();
 
     let adr_t = bincode::serialize(&adr).expect("Failed to serialize Address");
     let adr_t: Address = bincode::deserialize(&adr_t).expect("Failed to deserialize Address");
@@ -204,8 +226,8 @@ fn test_key_serde() {
         bincode::deserialize(&bytes64_t).expect("Failed to deserialize Bytes64");
     assert_eq!(bytes64, bytes64_t);
 
-    let uxto_id_t = bincode::serialize(&uxto_id).expect("Failed to serialize UtxoId");
-    let uxto_id_t: UtxoId = bincode::deserialize(&uxto_id_t).expect("Failed to deserialize UtxoId");
+    let uxto_id_t = bincode::serialize(&uxto_id).expect("Failed to serialize CoinId");
+    let uxto_id_t: CoinId = bincode::deserialize(&uxto_id_t).expect("Failed to deserialize CoinId");
     assert_eq!(uxto_id, uxto_id_t);
 }
 
@@ -263,8 +285,8 @@ fn test_key_types_hex_serialization() {
     let bytes64_to_string = serde_json::to_string(&bytes64).expect("Failed to serialize Bytes64");
     assert_eq!(format!("\"{}\"", bytes64), bytes64_to_string);
 
-    let utxo_id: UtxoId = rng.gen();
-    let utxo_id_to_string = serde_json::to_string(&utxo_id).expect("Failed to serialize UtxoId");
+    let utxo_id: CoinId = rng.gen();
+    let utxo_id_to_string = serde_json::to_string(&utxo_id).expect("Failed to serialize CoinId");
     assert_eq!(format!("\"{}\"", utxo_id), utxo_id_to_string);
 }
 
@@ -273,7 +295,7 @@ fn utxo_id_getters() {
     let rng = &mut StdRng::seed_from_u64(8586);
 
     for _ in 0..100 {
-        let utxo_id: UtxoId = rng.gen();
+        let utxo_id: CoinId = rng.gen();
 
         assert_eq!(utxo_id.tx_id().as_ref(), &utxo_id.as_ref()[..TxId::LEN]);
         assert_eq!(utxo_id.output_index(), utxo_id.as_ref()[TxId::LEN]);
