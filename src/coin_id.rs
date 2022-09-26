@@ -223,7 +223,7 @@ impl serde::Serialize for CoinId {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&format!("{:x}", &self))
+        serializer.serialize_str(&alloc::format!("{:x}", &self))
     }
 }
 
