@@ -57,7 +57,7 @@ macro_rules! check_consistency {
         assert_eq!(a.len(), $i::LEN);
         assert_eq!(b.len(), $i::LEN);
         assert_eq!(c.len(), $i::LEN);
-        #[cfg(feature = "unsafe_rust")]
+        #[cfg(feature = "optimized")]
         assert_eq!(d.len(), $i::LEN);
         assert_eq!(e.len(), $i::LEN);
     }};

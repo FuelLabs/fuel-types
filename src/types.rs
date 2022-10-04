@@ -109,10 +109,11 @@ macro_rules! key_methods {
             }
 
             #[cfg(feature = "optimized")]
-            /// Copy-free reference cast
+            /// Copy-free reference cast that does not check the size of the bytes.
+            ///
+            /// # Safety
+            /// The size of the bytes passed in must be the same exact size as Self.
             pub fn as_ref_checked(bytes: &[u8]) -> Option<&Self> {
-                let inner: &[u8; Self::LEN] = bytes.try_into().ok()?;
-
                 // The interpreter will frequently make references to keys and values using
                 // logically checked slices.
                 //
@@ -121,9 +122,9 @@ macro_rules! key_methods {
                 //
                 // The size is checked above and Self is `#[repr(transparent)]`
                 // so the layout is guaranteed to be correct.
-                Some(unsafe { &*(inner.as_ptr() as *const Self) })
+                Some(unsafe { &*(bytes.as_ptr() as *const Self) })
             }
-            
+
             /// The memory size of the type by the method.
             pub const fn size(&self) -> usize {
                 Self::LEN
