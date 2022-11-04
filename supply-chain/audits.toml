@@ -1,0 +1,63 @@
+
+# cargo-vet audits file
+
+[[audits.bincode]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-run"
+version = "1.3.3"
+
+[[audits.itoa]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-run"
+version = "1.0.2"
+
+[[audits.ppv-lite86]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "0.2.16"
+
+[[audits.rand]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "0.8.5"
+
+[[audits.rand_chacha]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "0.3.1"
+
+[[audits.rand_core]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "0.6.3"
+
+[[audits.ryu]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-run"
+version = "1.0.11"
+
+[[audits.serde]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "1.0.137"
+
+[[audits.serde_derive]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "1.0.137"
+
+[[audits.serde_json]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-run"
+version = "1.0.81"
+
+[[audits.syn]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "1.0.96"
+
+[[audits.unicode-ident]]
+who = "Oleksii Filonenko <oleksii.filonenko@fuel.sh>"
+criteria = "safe-to-deploy"
+version = "1.0.0"
+
