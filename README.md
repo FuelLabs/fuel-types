@@ -1,3 +1,6 @@
+# ⚠ Archival Notice
+This repo is no longer active and has been moved to: https://github.com/FuelLabs/fuel-vm/tree/master/fuel-types
+
 # Fuel Types
 
 [![build](https://github.com/FuelLabs/fuel-types/actions/workflows/ci.yml/badge.svg)](https://github.com/FuelLabs/fuel-types/actions/workflows/ci.yml)
