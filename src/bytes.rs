@@ -55,6 +55,22 @@ where
     &mut buf[WORD_SIZE..]
 }
 
+/// Consume the initial bytes of a buffer to store a word.
+///
+/// Return the remainder of the buffer
+///
+/// This function will `None` if the length of the buffer is smaller than a word.
+pub fn store_number_checked<T>(buf: &mut [u8], number: T) -> Option<&mut [u8]>
+where
+    T: Into<Word>,
+{
+    buf.get_mut(..WORD_SIZE)?
+        .copy_from_slice(&number.into().to_be_bytes());
+
+    Some(&mut buf[WORD_SIZE..])
+}
+
+#[cfg(feature = "optimized")]
 /// Read the initial bytes of a buffer to fetch a word.
 ///
 /// Return the read word and the remainder of the buffer
@@ -80,6 +96,20 @@ where
 ///
 /// Return the read word and the remainder of the buffer
 ///
+/// This function will return `None` if the length of the buffer is smaller than a word.
+pub fn restore_number_checked<T>(buf: &[u8]) -> Option<(T, &[u8])>
+where
+    T: From<Word>,
+{
+    // Index `WORD_SIZE..` is safe because buf is already checked to be at least `WORD_SIZE`.
+    from_slice_checked(buf).map(|number| (Word::from_be_bytes(number).into(), &buf[WORD_SIZE..]))
+}
+
+#[cfg(feature = "optimized")]
+/// Read the initial bytes of a buffer to fetch a word.
+///
+/// Return the read word and the remainder of the buffer
+///
 /// # Safety
 ///
 /// Extends the safety properties of [`from_slice_unchecked`]
@@ -94,6 +124,17 @@ pub unsafe fn restore_word_unchecked(buf: &[u8]) -> (Word, &[u8]) {
     (number, &buf[WORD_SIZE..])
 }
 
+/// Read the initial bytes of a buffer to fetch a word.
+///
+/// Return the read word and the remainder of the buffer
+///
+/// This function will return `None` if the length of the buffer is smaller than a word.
+pub fn restore_word_checked(buf: &[u8]) -> Option<(Word, &[u8])> {
+    // Index `WORD_SIZE..` is safe because buf is already checked to be at least `WORD_SIZE`.
+    from_slice_checked(buf).map(|number| (Word::from_be_bytes(number), &buf[WORD_SIZE..]))
+}
+
+#[cfg(feature = "optimized")]
 /// Read the a word-padded u8 from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -112,6 +153,17 @@ pub unsafe fn restore_u8_unchecked(buf: &[u8]) -> (u8, &[u8]) {
     (number, &buf[WORD_SIZE..])
 }
 
+/// Read the a word-padded u8 from a buffer.
+///
+/// Return the read word and the remainder of the buffer
+///
+/// This function will return `None` if the length of the buffer is smaller than a word.
+pub fn restore_u8_checked(buf: &[u8]) -> Option<(u8, &[u8])> {
+    // Index `WORD_SIZE..` is safe because buf is already checked to be at least `WORD_SIZE`.
+    from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as u8, &buf[WORD_SIZE..]))
+}
+
+#[cfg(feature = "optimized")]
 /// Read the a word-padded u16 from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -130,6 +182,17 @@ pub unsafe fn restore_u16_unchecked(buf: &[u8]) -> (u16, &[u8]) {
     (number, &buf[WORD_SIZE..])
 }
 
+/// Read the a word-padded u16 from a buffer.
+///
+/// Return the read word and the remainder of the buffer
+///
+/// This function will return `None` if the length of the buffer is smaller than a word.
+pub fn restore_u16_checked(buf: &[u8]) -> Option<(u16, &[u8])> {
+    // Index `WORD_SIZE..` is safe because buf is already checked to be at least `WORD_SIZE`.
+    from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as u16, &buf[WORD_SIZE..]))
+}
+
+#[cfg(feature = "optimized")]
 /// Read the a word-padded u32 from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -148,6 +211,17 @@ pub unsafe fn restore_u32_unchecked(buf: &[u8]) -> (u32, &[u8]) {
     (number, &buf[WORD_SIZE..])
 }
 
+/// Read the a word-padded u32 from a buffer.
+///
+/// Return the read word and the remainder of the buffer
+///
+/// This function will return `None` if the length of the buffer is smaller than a word.
+pub fn restore_u32_checked(buf: &[u8]) -> Option<(u32, &[u8])> {
+    // Index `WORD_SIZE..` is safe because buf is already checked to be at least `WORD_SIZE`.
+    from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as u32, &buf[WORD_SIZE..]))
+}
+
+#[cfg(feature = "optimized")]
 /// Read the a word-padded usize from a buffer.
 ///
 /// Return the read word and the remainder of the buffer
@@ -166,6 +240,17 @@ pub unsafe fn restore_usize_unchecked(buf: &[u8]) -> (usize, &[u8]) {
     (number, &buf[WORD_SIZE..])
 }
 
+/// Read the a word-padded usize from a buffer.
+///
+/// Return the read word and the remainder of the buffer
+///
+/// This function will return `None` if the length of the buffer is smaller than a word.
+pub fn restore_usize_checked(buf: &[u8]) -> Option<(usize, &[u8])> {
+    // Index `WORD_SIZE..` is safe because buf is already checked to be at least `WORD_SIZE`.
+    from_slice_checked(buf).map(|number| (Word::from_be_bytes(number) as usize, &buf[WORD_SIZE..]))
+}
+
+#[cfg(feature = "optimized")]
 /// Copy `array` into `buf` and return the remainder bytes of `buf`
 ///
 /// # Panics
@@ -180,6 +265,20 @@ pub fn store_array_unchecked<'a, const N: usize>(
     &mut buf[N..]
 }
 
+/// Copy `array` into `buf` and return the remainder bytes of `buf`
+///
+/// This function will return `None` if the length of `buf` is smaller than `N`.
+pub fn store_array_checked<'a, const N: usize>(
+    buf: &'a mut [u8],
+    array: &[u8; N],
+) -> Option<&'a mut [u8]> {
+    buf.get_mut(..N)?.copy_from_slice(array);
+
+    // Index `N..` is safe because buf is already checked to be at least `N`.
+    Some(&mut buf[N..])
+}
+
+#[cfg(feature = "optimized")]
 /// Read an array of `N` bytes from `buf`.
 ///
 /// Return the read array and the remainder bytes.
@@ -195,6 +294,17 @@ pub unsafe fn restore_array_unchecked<const N: usize>(buf: &[u8]) -> ([u8; N], &
     (from_slice_unchecked(buf), &buf[N..])
 }
 
+/// Read an array of `N` bytes from `buf`.
+///
+/// Return the read array and the remainder bytes.
+///
+/// This function will return `None` if the length of `buf` is smaller than `N`.
+pub fn restore_array_checked<const N: usize>(buf: &[u8]) -> Option<([u8; N], &[u8])> {
+    // Index `N..` is safe because buf is already checked to be at least `N`.
+    Some((from_slice_checked(buf)?, &buf[N..]))
+}
+
+#[cfg(feature = "optimized")]
 /// Add a conversion from arbitrary slices into arrays
 ///
 /// # Safety
@@ -207,6 +317,13 @@ pub unsafe fn from_slice_unchecked<const N: usize>(buf: &[u8]) -> [u8; N] {
     // Static assertions are not applicable to runtime length check (e.g. slices).
     // This is safe if the size of `bytes` is consistent to `N`
     *ptr
+}
+
+/// Add a conversion from arbitrary slices into arrays
+///
+/// This function will return None if the length of the slice is smaller than `N`.
+pub fn from_slice_checked<const N: usize>(buf: &[u8]) -> Option<[u8; N]> {
+    buf.get(..N)?.try_into().ok()
 }
 
 #[cfg(feature = "alloc")]
@@ -338,10 +455,15 @@ mod use_std {
     /// Will read the length, the bytes amount (word-aligned), and return the remainder buffer.
     pub fn restore_bytes(mut buf: &[u8]) -> io::Result<(usize, Vec<u8>, &[u8])> {
         // Safety: chunks_exact will guarantee the size of the slice is correct
-        let len = buf
-            .chunks_exact(WORD_SIZE)
-            .next()
-            .map(|b| unsafe { from_slice_unchecked(b) })
+        let len = buf.chunks_exact(WORD_SIZE).next();
+
+        #[cfg(feature = "optimized")]
+        let len = len.map(|b| unsafe { from_slice_unchecked(b) });
+
+        #[cfg(not(feature = "optimized"))]
+        let len = len.and_then(from_slice_checked);
+
+        let len = len
             .map(|len| Word::from_be_bytes(len) as usize)
             .ok_or_else(eof)?;
 
@@ -395,10 +517,15 @@ mod use_std {
         T: From<Word>,
     {
         // Safe checked memory bounds
-        let number = buf
-            .chunks_exact(WORD_SIZE)
-            .next()
-            .map(|b| unsafe { from_slice_unchecked(b) })
+        let number = buf.chunks_exact(WORD_SIZE).next();
+
+        #[cfg(feature = "optimized")]
+        let number = number.map(|b| unsafe { from_slice_unchecked(b) });
+
+        #[cfg(not(feature = "optimized"))]
+        let number = number.and_then(from_slice_checked);
+
+        let number = number
             .map(|chunk| Word::from_be_bytes(chunk).into())
             .ok_or_else(eof)?;
 

@@ -24,6 +24,8 @@ const fn hex_val(c: u8) -> Option<u8> {
 
 macro_rules! key {
     ($i:ident, $s:expr) => {
+        // Needed to ensure the as_ref_* memory layout is correct.
+        #[repr(transparent)]
         #[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
@@ -41,6 +43,8 @@ macro_rules! key {
 
 macro_rules! key_with_big_array {
     ($i:ident, $s:expr) => {
+        // Needed to ensure the as_ref_* memory layout is correct.
+        #[repr(transparent)]
         #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
@@ -82,6 +86,7 @@ macro_rules! key_methods {
                 $i([0; $s])
             }
 
+            #[cfg(feature = "optimized")]
             /// Add a conversion from arbitrary slices into owned
             ///
             /// # Safety
@@ -93,16 +98,31 @@ macro_rules! key_methods {
                 $i(bytes::from_slice_unchecked(bytes))
             }
 
-            /// Copy-free reference cast
+            /// Add a conversion from arbitrary slices into owned
+            ///
+            /// # Panics
+            ///
+            /// This function will panic if the length of the slice is smaller than
+            /// `Self::LEN`.
+            pub fn from_slice(bytes: &[u8]) -> Option<Self> {
+                Some($i(bytes::from_slice_checked(bytes)?))
+            }
+
+            #[cfg(feature = "optimized")]
+            /// Copy-free reference cast that does not check the size of the bytes.
+            ///
             /// # Safety
-            /// Assumes byte slice is the same length as this type.
-            pub unsafe fn as_ref_unchecked(bytes: &[u8]) -> &Self {
+            /// The size of the bytes passed in must be the same exact size as Self.
+            pub fn as_ref_checked(bytes: &[u8]) -> Option<&Self> {
                 // The interpreter will frequently make references to keys and values using
                 // logically checked slices.
                 //
                 // This function will save unnecessary copy to owned slices for the interpreter
                 // access
-                &*(bytes.as_ptr() as *const Self)
+                //
+                // The size is checked above and Self is `#[repr(transparent)]`
+                // so the layout is guaranteed to be correct.
+                Some(unsafe { &*(bytes.as_ptr() as *const Self) })
             }
 
             /// The memory size of the type by the method.
