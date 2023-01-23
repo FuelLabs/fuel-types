@@ -24,16 +24,29 @@ const fn hex_val(c: u8) -> Option<u8> {
 
 macro_rules! key {
     ($i:ident, $s:expr) => {
-        #[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[repr(transparent)]
+        #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
+
+        impl Default for $i {
+            fn default() -> $i {
+                $i([0u8; $s])
+            }
+        }
 
         key_methods!($i, $s);
 
         #[cfg(feature = "random")]
         impl Distribution<$i> for Standard {
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $i {
-                $i(rng.gen())
+                let mut default: $i = Default::default();
+
+                for i in default.iter_mut() {
+                    *i = rng.gen();
+                }
+
+                default
             }
         }
     };
@@ -271,6 +284,9 @@ key!(Bytes20, 20);
 key!(Bytes32, 32);
 key!(MessageId, 32);
 key!(Salt, 32);
+key!(UtxoId, 33);
+
+pub type TxId = Bytes32;
 
 key_with_big_array!(Bytes64, 64);
 
@@ -284,4 +300,28 @@ impl ContractId {
 impl AssetId {
     /// The base native asset of the Fuel protocol.
     pub const BASE: AssetId = AssetId::zeroed();
+}
+
+impl UtxoId {
+    pub const fn tx_id(&self) -> TxId {
+        let r = self.0;
+
+        #[rustfmt::skip]
+        let tx_id: [u8; TxId::LEN] = [
+            r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7],
+            r[8], r[9], r[10], r[11], r[12], r[13], r[14], r[15],
+            r[16], r[17], r[18], r[19], r[20], r[21], r[22], r[23],
+            r[24], r[25], r[26], r[27], r[28], r[29], r[30], r[31],
+        ];
+
+        TxId::new(tx_id)
+    }
+
+    pub const fn output_index(&self) -> u8 {
+        self.0[TxId::LEN]
+    }
+
+    pub fn replace_tx_id(&mut self, tx_id: TxId) {
+        self.as_mut()[..TxId::LEN].copy_from_slice(tx_id.as_ref());
+    }
 }
