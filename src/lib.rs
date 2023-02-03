@@ -5,9 +5,12 @@
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
+extern crate core;
 
+mod coin_id;
 mod types;
 
+pub use coin_id::CoinId;
 pub use types::*;
 
 /// Word-aligned bytes serialization functions.

@@ -6,6 +6,7 @@ use core::array::TryFromSliceError;
 use core::convert::TryFrom;
 use core::ops::{Deref, DerefMut};
 use core::{fmt, str};
+use zerocopy::{AsBytes, FromBytes};
 
 #[cfg(feature = "random")]
 use rand::{
@@ -13,7 +14,7 @@ use rand::{
     Rng,
 };
 
-const fn hex_val(c: u8) -> Option<u8> {
+pub(crate) const fn hex_val(c: u8) -> Option<u8> {
     match c {
         b'A'..=b'F' => Some(c - b'A' + 10),
         b'a'..=b'f' => Some(c - b'a' + 10),
@@ -24,16 +25,29 @@ const fn hex_val(c: u8) -> Option<u8> {
 
 macro_rules! key {
     ($i:ident, $s:expr) => {
-        #[derive(Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+        #[repr(transparent)]
+        #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsBytes, FromBytes)]
         /// FuelVM atomic type.
         pub struct $i([u8; $s]);
+
+        impl Default for $i {
+            fn default() -> $i {
+                $i([0u8; $s])
+            }
+        }
 
         key_methods!($i, $s);
 
         #[cfg(feature = "random")]
         impl Distribution<$i> for Standard {
             fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> $i {
-                $i(rng.gen())
+                let mut default: $i = Default::default();
+
+                for i in default.iter_mut() {
+                    *i = rng.gen();
+                }
+
+                default
             }
         }
     };
@@ -200,13 +214,13 @@ macro_rules! key_methods {
 
         impl fmt::Debug for $i {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                <Self as fmt::LowerHex>::fmt(&self, f)
+                <Self as fmt::LowerHex>::fmt(self, f)
             }
         }
 
         impl fmt::Display for $i {
             fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-                <Self as fmt::LowerHex>::fmt(&self, f)
+                <Self as fmt::LowerHex>::fmt(self, f)
             }
         }
 
@@ -264,15 +278,15 @@ macro_rules! key_methods {
 
 key!(Address, 32);
 key!(AssetId, 32);
-key!(ContractId, 32);
 key!(Bytes4, 4);
 key!(Bytes8, 8);
 key!(Bytes20, 20);
+key_with_big_array!(Bytes64, 64);
 key!(Bytes32, 32);
+key!(ContractId, 32);
 key!(MessageId, 32);
 key!(Salt, 32);
-
-key_with_big_array!(Bytes64, 64);
+key!(TxId, 32);
 
 impl ContractId {
     /// Seed for the calculation of the contract id from its code.
